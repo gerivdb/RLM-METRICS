@@ -1,4 +1,5 @@
 import pytest
+from unittest.mock import patch
 from src.app import app
 
 
@@ -23,6 +24,17 @@ def test_metrics(client):
     assert "phi_cps" in data
     assert "benchmarks" in data
     assert "health" in data
+
+
+def test_metrics_uses_kix_phi_cps(client):
+    fake_response = type("Resp", (), {"status_code": 200, "json": lambda self: {"phi_cps": 4.2, "healthy": 7, "total": 8}})()
+    with patch("src.app.requests.get", return_value=fake_response):
+        resp = client.get("/metrics")
+        assert resp.status_code == 200
+        data = resp.get_json()
+        assert data["phi_cps"] == 4.2
+        assert data["health"]["runners_ok"] == 7
+        assert data["health"]["runners_total"] == 8
 
 
 def test_vote_success(client):

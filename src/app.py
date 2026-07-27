@@ -1,11 +1,13 @@
 from flask import Flask, jsonify, request
 import os
+import requests
 from datetime import datetime, timezone
 
 app = Flask(__name__)
 
 PORT = int(os.environ.get("PORT", 8802))
 METRICS: dict = {}
+KIX_BASE_URL = os.environ.get("KIX_BASE_URL", "http://localhost:8800")
 
 
 def _utcnow() -> str:
@@ -19,12 +21,25 @@ def health():
 
 @app.get("/metrics")
 def metrics():
+    phi_cps = 3.697
+    latency_ms_p95 = 12.4
+    runners_ok = 0
+    runners_total = 0
+    try:
+        resp = requests.get(f"{KIX_BASE_URL}/audit", timeout=2)
+        if resp.status_code == 200:
+            data = resp.json() or {}
+            phi_cps = data.get("phi_cps", phi_cps)
+            runners_ok = data.get("healthy", 0)
+            runners_total = data.get("total", 0)
+    except requests.RequestException:
+        pass
     return jsonify({
         "service": "rlm-metrics",
         "port": PORT,
-        "phi_cps": 3.697,
-        "benchmarks": {"latency_ms_p95": 12.4},
-        "health": {"runners_ok": 0, "runners_total": 0},
+        "phi_cps": phi_cps,
+        "benchmarks": {"latency_ms_p95": latency_ms_p95},
+        "health": {"runners_ok": runners_ok, "runners_total": runners_total},
         "timestamp": _utcnow(),
     }), 200
 
