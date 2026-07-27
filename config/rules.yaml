@@ -1,0 +1,4 @@
+service: rlm-metrics
+port: 8802
+database:
+  url: sqlite:///data/rlm-metrics.sqlite
