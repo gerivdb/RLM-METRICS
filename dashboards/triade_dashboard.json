@@ -1,0 +1,115 @@
+{
+  "dashboard": "triade_performance",
+  "version": "1.0.0",
+  "title": "Triade Cognitive - Performance Dashboard",
+  "description": "Métriques de performance pour LLUX + PIANO + SPIDX",
+  
+  "panels": [
+    {
+      "id": "latency",
+      "title": "Latence LLUX",
+      "type": "gauge",
+      "metric": "llux_latency_ms",
+      "unit": "ms",
+      "thresholds": {
+        "green": 100,
+        "yellow": 500,
+        "red": 1000
+      },
+      "refresh": "10s"
+    },
+    {
+      "id": "tokens_per_sec",
+      "title": "Débit d'inférence",
+      "type": "graph",
+      "metric": "llux_tokens_per_sec",
+      "unit": "tokens/s",
+      "refresh": "10s"
+    },
+    {
+      "id": "memory",
+      "title": "Mémoire LLUX",
+      "type": "gauge",
+      "metric": "llux_memory_mb",
+      "unit": "MB",
+      "thresholds": {
+        "green": 2048,
+        "yellow": 4096,
+        "red": 8192
+      },
+      "refresh": "30s"
+    },
+    {
+      "id": "embedding_dim",
+      "title": "Dimension d'embedding",
+      "type": "stat",
+      "metric": "spidx_embedding_dim",
+      "unit": "dim",
+      "value": 768,
+      "refresh": "60s"
+    },
+    {
+      "id": "health_status",
+      "title": "Statut de santé",
+      "type": "status",
+      "metric": "llux_health_status",
+      "refresh": "5s"
+    },
+    {
+      "id": "kv_cache_hit_rate",
+      "title": "Taux de hit KV Cache",
+      "type": "graph",
+      "metric": "llux_kv_cache_hit_rate",
+      "unit": "%",
+      "refresh": "30s"
+    },
+    {
+      "id": "request_rate",
+      "title": "Taux de requêtes",
+      "type": "graph",
+      "metric": "llux_request_rate",
+      "unit": "req/s",
+      "refresh": "10s"
+    },
+    {
+      "id": "error_rate",
+      "title": "Taux d'erreur",
+      "type": "graph",
+      "metric": "llux_error_rate",
+      "unit": "%",
+      "thresholds": {
+        "green": 1,
+        "yellow": 5,
+        "red": 10
+      },
+      "refresh": "30s"
+    }
+  ],
+  
+  "alerts": [
+    {
+      "id": "latency_alert",
+      "condition": "llux_latency_ms > 1000",
+      "severity": "critical",
+      "message": "Latence LLUX > 1s"
+    },
+    {
+      "id": "memory_alert",
+      "condition": "llux_memory_mb > 8192",
+      "severity": "warning",
+      "message": "Mémoire LLUX > 8GB"
+    },
+    {
+      "id": "health_alert",
+      "condition": "llux_health_status != 'healthy'",
+      "severity": "critical",
+      "message": "LLUX n'est pas sain"
+    }
+  ],
+  
+  "export": {
+    "enabled": true,
+    "formats": ["json", "csv", "png"],
+    "schedule": "0 */6 * * *"
+  }
+}
